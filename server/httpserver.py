@@ -18,12 +18,17 @@ class HttpServer:
         split_route_info = route_info.split(" ")
         return Request(split_route_info[0], split_route_info[1], split_request[-1])
 
-    def add_route(self, method, route, function):
+    def _add_route(self, method, route, function):
         route_tuple = (method, route)
         if route_tuple in self.routes:
             print(f"Overriding exisitng mapping for {method} at {route}")
         print(f"Exposing {route} for {method} operations")
         self.routes[route_tuple] = function
+
+    def get_mapping(self, route):
+        def decorator(func):
+            self.add_route("GET", route, func)
+        return decorator
 
     def _handle_request(self, request):
         if (request.get_method(), request.get_route()) in self.routes:
@@ -47,7 +52,8 @@ class HttpServer:
             client_socket, address = self.server_socket.accept()
 
             print("Connected with " + address[0] + ":" + str(address[1]))
-            request_obj = self._parse_request(client_socket.recv(1024).decode("utf-8"))
+            request_obj = self._parse_request(
+                client_socket.recv(1024).decode("utf-8"))
             response_obj = self._handle_request(request_obj)
 
             client_socket.sendall(str(response_obj).encode("utf-8"))
