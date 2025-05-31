@@ -18,7 +18,7 @@ class HttpServer:
         split_route_info = route_info.split(" ")
         return Request(split_route_info[0], split_route_info[1], split_request[-1])
 
-    def add_route(self, method, route, function):
+    def _add_route(self, method, route, function):
         route_tuple = (method, route)
         if route_tuple in self.routes:
             print(f"Overriding exisitng mapping for {method} at {route}")
