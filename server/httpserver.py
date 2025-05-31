@@ -25,6 +25,11 @@ class HttpServer:
         print(f"Exposing {route} for {method} operations")
         self.routes[route_tuple] = function
 
+    def get_mapping(self, route):
+        def decorator(func):
+            self.add_route("GET", route, func)
+        return decorator
+
     def _handle_request(self, request):
         if (request.get_method(), request.get_route()) in self.routes:
             return self.routes[(request.get_method(), request.get_route())]()
@@ -47,7 +52,8 @@ class HttpServer:
             client_socket, address = self.server_socket.accept()
 
             print("Connected with " + address[0] + ":" + str(address[1]))
-            request_obj = self._parse_request(client_socket.recv(1024).decode("utf-8"))
+            request_obj = self._parse_request(
+                client_socket.recv(1024).decode("utf-8"))
             response_obj = self._handle_request(request_obj)
 
             client_socket.sendall(str(response_obj).encode("utf-8"))
