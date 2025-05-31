@@ -27,15 +27,16 @@ class HttpServer:
 
     def _handle_request(self, request):
         if (request.get_method(), request.get_route()) in self.routes:
-            print(f"{request.get_route()} is exposed for {request.get_method()} operations")
-            return Response("200 0K",
-                            "Content-Type: text/html; charset=UTF-8\r\n" "Content-Length: 5 \r\n",
-                            "hello")
+            return self.routes[(request.get_method(), request.get_route())]()
         else:
-            print(f"{request.get_route()} is NOT exposed for {request.get_method()} operations")
-            return Response("404 NOT FOUND",
-                            "Content-Type: text/html; charset-UTF-8\r\n" "Content-Length: 18\r\n",
-                            "No Route Available")
+            print(
+                f"{request.get_route()} is NOT exposed for {request.get_method()} operations"
+            )
+            return Response(
+                "404 NOT FOUND",
+                "Content-Type: text/html; charset-UTF-8\r\n" "Content-Length: 18\r\n",
+                "No Route Available",
+            )
 
     def start(self):
         self.server_socket.bind((self.route, self.port))
