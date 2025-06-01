@@ -26,5 +26,3 @@ if __name__ == "__main__":
         )
 
     server.start()
-
-    say_hello()

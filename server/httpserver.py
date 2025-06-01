@@ -12,12 +12,6 @@ class HttpServer:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.routes = {}
 
-    def _parse_request(self, request):
-        split_request = request.split("\r\n")
-        route_info = split_request[0]
-        split_route_info = route_info.split(" ")
-        return Request(split_route_info[0], split_route_info[1], split_request[-1])
-
     def _add_route(self, method, route, function):
         route_tuple = (method, route)
         if route_tuple in self.routes:
@@ -25,10 +19,11 @@ class HttpServer:
         print(f"Exposing {route} for {method} operations")
         self.routes[route_tuple] = function
 
-    def get_mapping(self, route):
-        def decorator(func):
-            self.add_route("GET", route, func)
-        return decorator
+    def _parse_request(self, request):
+        split_request = request.split("\r\n")
+        route_info = split_request[0]
+        split_route_info = route_info.split(" ")
+        return Request(split_route_info[0], split_route_info[1], split_request[-1])
 
     def _handle_request(self, request):
         if (request.get_method(), request.get_route()) in self.routes:
@@ -42,6 +37,16 @@ class HttpServer:
                 "Content-Type: text/html; charset-UTF-8\r\n" "Content-Length: 18\r\n",
                 "No Route Available",
             )
+
+    def get_mapping(self, route):
+        def decorator(func):
+            self._add_route("GET", route, func)
+        return decorator
+
+    def post_mapping(self, route):
+        def decorator(func):
+            self._add_route("POST", route, func)
+        return decorator
 
     def start(self):
         self.server_socket.bind((self.route, self.port))
